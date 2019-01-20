@@ -18,7 +18,8 @@ public class Quote {
     private String category;
     @ColumnInfo(name = "date")
     private Date date;
-
+    private String author;
+    private boolean isFavorite;
 
     public int getId() {
         return id;
@@ -52,11 +53,29 @@ public class Quote {
         this.date = date;
     }
 
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
     @Ignore
-    public Quote(String content, String category, Date date) {
+    public Quote(String content, String category, Date date, String author, boolean isFavorite) {
         this.content = content;
         this.category = category;
         this.date = date;
+        this.author = author;
+        this.isFavorite = false;
     }
 
     public Quote(int id, String content, String category, Date date) {
@@ -64,5 +83,7 @@ public class Quote {
         this.content = content;
         this.category = category;
         this.date = date;
+        this.author = author;
+        this.isFavorite = false;
     }
 }

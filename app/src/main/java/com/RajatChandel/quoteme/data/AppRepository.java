@@ -8,22 +8,54 @@ import android.content.Context;
 
 import com.RajatChandel.quoteme.utils.QuotesUtils;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class AppRepository {
 
-    private QuotesDao mDao;
     private AppDatabase mDatabase;
+    private final QuotesDao mDao;
+    private static volatile AppRepository sInstance = null;
+    private final ExecutorService mIoExecutor;
 
-    public AppRepository(Context context){
-        mDatabase = AppDatabase.getInstance(context.getApplicationContext());
+    public static AppRepository getInstance(Context context) {
+        if (sInstance == null) {
+            synchronized (AppRepository.class) {
+                if (sInstance == null) {
+                    AppDatabase database = AppDatabase.getInstance(context);
+                    sInstance = new AppRepository(database.quotesDao(),
+                            Executors.newSingleThreadExecutor());
+                }
+            }
+        }
+        return sInstance;
+    }
+
+    private AppRepository(QuotesDao dao, ExecutorService executor) {
+        mIoExecutor = executor;
+        mDao = dao;
     }
 
     public LiveData<PagedList<Quote>> getQuotes(String sortBy, boolean favorite){
 
         DataSource.Factory<Integer, Quote> quotesDataSource
                 = mDao.getSortedQuotes(QuotesUtils.buildQuotesQuery(sortBy, favorite));
-
-        LiveData<PagedList<Quote>> quotesList = new LivePagedListBuilder<>(quotesDataSource, 20)
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(true)
+                .setPageSize(5)
+                .setPrefetchDistance(15)
                 .build();
-        return quotesList;
+
+        return new LivePagedListBuilder<>(quotesDataSource, config)
+                .setFetchExecutor(mIoExecutor)
+                .build();
+    }
+
+    public void addQuote(Quote quote) {
+        mDao.insertQuote(quote);
+    }
+
+    public void deleteAll() {
+        mDao.deleteAllQuotes();
     }
 }

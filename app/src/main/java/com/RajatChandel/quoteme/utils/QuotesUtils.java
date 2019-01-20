@@ -10,12 +10,12 @@ public class QuotesUtils {
 
     public static SupportSQLiteQuery buildQuotesQuery(String sortOrder, boolean favorite){
         String columnName = "id";
-        switch (sortOrder){
+     /*   switch (sortOrder){
             case "id":
                 columnName = "id";
                 break;
-        }
-        SupportSQLiteQuery query = SupportSQLiteQueryBuilder.builder(AppDatabase.DATABASE_NAME)
+        }*/
+        SupportSQLiteQuery query = SupportSQLiteQueryBuilder.builder("quotes")
                 .orderBy(columnName).create();
 
         return query;
